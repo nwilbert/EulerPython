@@ -5,7 +5,7 @@ zero_to_twenty = ["zero", "one", "two", "three", "four", "five", "six", "seven",
                  "nineteen"]
 ten_to_hundred= [None, "ten", "twenty", "thirty", "forty", "fifty", "sixty",
                  "seventy", "eighty", "ninety"]
-baseten = [None, None, None, "hundred", "thousand"]
+base_ten = [None, None, "hundred", "thousand"]
 
 def textual_number(n):
     """Return the textual form of the given number.
@@ -29,30 +29,31 @@ def textual_number(n):
         'four-hundred and eleven'
         >>> textual_number(1000)
         'one-thousand'
+        >>> textual_number(1300)
+        'one-thousand and three-hundred'
     """
-    digits = [int(d) for d in str(n)]
     s = ""
-    # fourth digit
-    if n == 1000:
-        s += zero_to_twenty[1] + "-" + baseten[4]
-    # deal with third digit
-    if n >= 100 and digits[-3]:
-        if s:
-            s += " and "
-        s += zero_to_twenty[digits[-3]] + "-" + baseten[3]
+    rest = n
+    for exponent in range(len(base_ten),1,-1):
+        digit = rest // 10**exponent
+        if digit:
+            if s:
+                s += " and "
+            s += zero_to_twenty[digit] + "-" + base_ten[exponent]
+        rest %= 10**exponent
     # deal with first two digits
-    last_two = n % 100
-    if s and last_two:
+    if s and rest:
         s += " and "
-    elif not s and not last_two:
+    elif not s and not rest:
         s += zero_to_twenty[0]
-    if last_two:
-        if 0 < last_two < 20:
-            s += zero_to_twenty[last_two]
+    if rest:
+        if 0 < rest < 20:
+            s += zero_to_twenty[rest]
         else:
-            s += ten_to_hundred[digits[-2]]
-            if digits[-1]:
-                s += "-" + zero_to_twenty[digits[-1]]
+            s += ten_to_hundred[rest // 10]
+            rest %= 10
+            if rest:
+                s += "-" + zero_to_twenty[rest]
     return s
 
 if __name__ == "__main__":
